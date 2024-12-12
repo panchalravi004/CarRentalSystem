@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.css">
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script> -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
+  
+    <style>
+        .user-name-title {
+            background-color: white;
+            padding: 2px 15px;
+            border-radius: 50px;
+            border: 1px solid rgb(206, 206, 206);
+        }
+
+        .nav-tab-container {
+            display: none;
+            /* padding: 20px; */
+            padding-top: 25px;
+            background-color: white;
+        }
+
+        .nav-tab-container.active {
+            display: block;
+        }
+
+        .nav-link {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    
+    {% if messages %}
+        <div class="position-absolute" style="top: 10px; right: 10px; z-index: 1000;">
+            {% for message in messages %}
+                <div class="toast align-items-center show mb-2 text-bg-{{message.tags}}" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            {{message}}
+                        </div>
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <script> window.setTimeout(function () { document.querySelector('.toast').remove() }, 5000);</script>
+    {% endif %}
+
+    {% block content %}
+    
+    {% endblock content %}
+
+    <script>
+        let options = { ordering: false }
+        document.addEventListener("DOMContentLoaded", function(e) {
+            new DataTable('#availableCarsTable', options);
+            new DataTable('#rentalDetailsTable', options);
+            new DataTable('#rentalRequestTable', options);
+        });
+    </script>
+</body>
+
+</html>

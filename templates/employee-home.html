@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+{% block title %}Customer Dashboard{% endblock title %}
+{% block content %}
+{% load static %}
+
+    <nav class="container navbar navbar-expand-lg bg-body-tertiary border rounded shadow-sm mt-4">
+        <div class="container-fluid">
+            <a class="navbar-brand bg-dark text-white p-2 rounded">
+                <i class="fa-solid fa-user-shield"></i>
+                Employee Dashboard
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="user-name-title">
+                    <i class="fa-solid fa-user-tie"></i>
+                    {{user.first_name}}
+                </span>
+                <a href="{% url 'logout' %}" type="button" class="btn btn-dark btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 p-2 bg-light rounded border shadow-sm">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" data-id="available-cars">
+                    <i class="fa-solid fa-car"></i>
+                    Available Cars
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-id="rental-details">
+                    <i class="fa-solid fa-calendar-week"></i>
+                    Rental Details
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-id="rental-request">
+                    <i class="fa-solid fa-envelope"></i>
+                    Rental Request
+                </a>
+            </li>
+        </ul>
+        <div class="nav-tab-container active " data-id="available-cars">
+            <div class="row justify-content-center">
+                <div class="col-10">
+                    <div class="d-flex justify-content-end pb-3">
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addNewCarModal">
+                            <i class="fa-solid fa-plus"></i>
+                            Add New Car
+                        </button>
+                    </div>
+                    {% if carList.count > 0 %}
+                        <table class="table table-hover" id="availableCarsTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Car Name</th>
+                                    <th scope="col">Model</th>
+                                    <th scope="col">Year</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col" style="width: 15%;">Status</th>
+                                    <th scope="col" style="width: 5%;">Edit</th>
+                                    <th scope="col" style="width: 5%;">Availablity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for car in carList %}
+                                    <tr>
+                                        <td>{{car.name}}</td>
+                                        <td>{{car.model}}</td>
+                                        <td>{{car.year}}</td>
+                                        <td>{{car.type}}</td>
+                                        <td>{{car.status}}</td>
+                                        <td>
+                                            <button data-id="{{car.id}}" data-name="{{car.name}}" data-model="{{car.model}}" data-year="{{car.year}}" data-type="{{car.type}}" type="button" class="btn btn-outline-success btn-sm" title="Edit Car Details" data-bs-toggle="modal" data-bs-target="#updateCarModal" onclick="handleCarUpdate(this)">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                        </td>
+                                        <td class="d-flex justify-content-center">
+                                            {% if car.status == 'Available' %}
+                                                <a href="{% url 'update_status' car.id car.status %}" type="button" class="btn btn-success btn-sm" title="Change Status">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'update_status' car.id car.status %}" type="button" class="btn btn-danger btn-sm" title="Change Status">
+                                                    <i class="fa-solid fa-eye-slash"></i>
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="d-flex align-items-center flex-column">
+                            <img src="{% static '/images/illustration.png' %}" alt="" srcset="" width="200">
+                            <span style="color: gray;font-size: 14px;">Oops! There is no car available.</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="nav-tab-container" data-id="rental-details">
+            <div class="row justify-content-center">
+                <div class="col-10">
+                    {% if rentalList.count > 0 %}
+                        <table class="table table-hover" id="rentalDetailsTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Car Name</th>
+                                    <th scope="col">Start Date</th>
+                                    <th scope="col">End Date</th>
+                                    <th scope="col">Customer Contact</th>
+                                    <th scope="col">Customer Address</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in rentalList %}
+                                    <tr>
+                                        <td>{{req.car.name}}</td>
+                                        <td>{{req.start_date}}</td>
+                                        <td>{{req.end_date}}</td>
+                                        <td>{{req.customer.name}} <br> {{req.customer.email}} <br>{{req.customer.phone}} </td>
+                                        <td>{{req.customer.address}}</td>
+                                        <td>
+                                            <i class="fa-solid fa-check text-success"></i>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="d-flex align-items-center flex-column">
+                            <img src="{% static '/images/illustration.png' %}" alt="" srcset="" width="200">
+                            <span style="color: gray;font-size: 14px;">Oops! There is no rental details.</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="nav-tab-container" data-id="rental-request">
+            <div class="row justify-content-center">
+                <div class="col-10">
+                    {% if requestList.count > 0 %}
+                        <table class="table table-hover" id="rentalRequestTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Car Name</th>
+                                    <th scope="col">Start Date</th>
+                                    <th scope="col">End Date</th>
+                                    <th scope="col" style="width: 15%;">Status</th>
+                                    <th scope="col" style="width: 5%;">Info</th>
+                                    <th scope="col" style="width: 5%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in requestList %}
+                                    <tr>
+                                        <td>{{req.car.name}}</td>
+                                        <td>{{req.start_date}}</td>
+                                        <td>{{req.end_date}}</td>
+                                        <td>{{req.status}}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="left" 
+                                                title="{{req.customer.name}}" data-bs-content="{{req.customer.email}}">
+                                                <i class="fa-solid fa-circle-info"></i>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex justify-content-center">
+                                                {% if req.status == 'Pending' %}
+                                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                                        <a href="{% url 'car_request_update' req.id 'Accepted' %}" type="button" class="btn btn-success btn-sm" title="Accept Request">
+                                                            <i class="fa-solid fa-check"></i>
+                                                        </a>
+                                                        <a href="{% url 'car_request_update' req.id 'Not Available' %}" type="button" class="btn btn-outline-danger btn-sm" title="Reject Request">
+                                                            <i class="fa-solid fa-xmark"></i>
+                                                        </a>
+                                                    </div>
+                                                {% else %}
+                                                    <i class="fa-solid fa-ban text-danger mt-2"></i>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="d-flex align-items-center flex-column">
+                            <img src="{% static '/images/illustration.png' %}" alt="" srcset="" width="200">
+                            <span style="color: gray;font-size: 14px;">Oops! There is no rental request.</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Car Modal -->
+    <div class="modal fade" id="addNewCarModal" tabindex="-1" aria-labelledby="addNewCarModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content" method="POST" action="{% url 'add_new_car' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5 " id="addNewCarModalLabel" style="flex: 1;text-align: center;">
+                        <i class="fa-solid fa-car-side"></i>
+                        Add New Car
+                    </h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <div class="mb-3">
+                            <label for="carNameInput" class="form-label">Car Name</label>
+                            <input type="text" class="form-control" id="carNameInput" name="name" placeholder="Enter Your Car Name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="carModelInput" class="form-label">Car Model</label>
+                            <input type="text" class="form-control" id="carModelInput" name="model" placeholder="Enter Your Car Model">
+                        </div>
+                        <div class="mb-3">
+                            <label for="carYearInput" class="form-label">Year</label>
+                            <input type="number" class="form-control" id="carYearInput" name="year" placeholder="Enter Year">
+                        </div>
+                        <div class="mb-3">
+                            <label for="carTypeInput" class="form-label">Type</label>
+                            <select class="form-select" aria-label="Default select example" name="type" id="carTypeInput">
+                                <option selected>Select Car Type</option>
+                                <option value="Hatchback">Hatchback</option>
+                                <option value="Sedan">Sedan</option>
+                                <option value="SUV">SUV</option>
+                                <option value="MUV">MUV</option>
+                                <option value="Coupe">Coupe</option>
+                                <option value="Convertible">Convertible</option>
+                                <option value="Pickup Truck">Pickup Truck</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Car Modal -->
+    <div class="modal fade" id="updateCarModal" tabindex="-1" aria-labelledby="updateCarModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content" method="POST" action="{% url 'update_car' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5 " id="updateCarModalLabel" style="flex: 1;text-align: center;">
+                        <i class="fa-solid fa-car-side"></i>
+                        Update Car
+                    </h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <input type="hidden" id="carIdInputEdit" name="id">
+
+                        <div class="mb-3">
+                            <label for="carNameInputEdit" class="form-label">Car Name</label>
+                            <input type="text" class="form-control" id="carNameInputEdit" name="name" placeholder="Enter Your Car Name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="carModelInputEdit" class="form-label">Car Model</label>
+                            <input type="text" class="form-control" id="carModelInputEdit" name="model" placeholder="Enter Your Car Model">
+                        </div>
+                        <div class="mb-3">
+                            <label for="carYearInputEdit" class="form-label">Year</label>
+                            <input type="number" class="form-control" id="carYearInputEdit" name="year" placeholder="Enter Year">
+                        </div>
+                        <div class="mb-3">
+                            <label for="carTypeInputEdit" class="form-label">Type</label>
+                            <select class="form-select" aria-label="Default select example" name="type" id="carTypeInputEdit">
+                                <option selected>Select Car Type</option>
+                                <option value="Hatchback">Hatchback</option>
+                                <option value="Sedan">Sedan</option>
+                                <option value="SUV">SUV</option>
+                                <option value="MUV">MUV</option>
+                                <option value="Coupe">Coupe</option>
+                                <option value="Convertible">Convertible</option>
+                                <option value="Pickup Truck">Pickup Truck</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+
+        function handleCarUpdate(target){
+            var id = target.dataset.id;
+            var name = target.dataset.name;
+            var model = target.dataset.model;
+            var year = target.dataset.year;
+            var type = target.dataset.type;
+
+            document.querySelector('#carIdInputEdit').value = id;
+            document.querySelector('#carNameInputEdit').value = name;
+            document.querySelector('#carModelInputEdit').value = model;
+            document.querySelector('#carYearInputEdit').value = year;
+            document.querySelector('#carTypeInputEdit').value = type;
+
+        }
+
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        var popoverList = popoverTriggerList.map((ele) => new bootstrap.Popover(ele, {trigger: 'focus'}))
+
+        document.querySelectorAll('.nav-link').forEach(ele => {
+            ele.addEventListener('click', function (event) {
+                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                document.querySelectorAll('.nav-tab-container').forEach(link => link.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+                document.querySelector(`.nav-tab-container[data-id="${event.currentTarget.dataset.id}"]`).classList.add('active');
+            })
+        })
+
+    </script>
+
+{% endblock content %}

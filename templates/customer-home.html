@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% block title %}Customer Dashboard{% endblock title %}
+{% block content %}
+{% load static %}
+
+    <nav class="container navbar navbar-expand-lg bg-body-tertiary border rounded-bottom shadow-sm mt-4">
+        <div class="container-fluid">
+            <a class="navbar-brand bg-dark text-white p-2 rounded">
+                <i class="fa-solid fa-user"></i>
+                Customer Dashboard
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="user-name-title" style="text-transform: capitalize;">
+                    <i class="fa-solid fa-user-tie"></i>
+                    {{user.first_name}}
+                </span>
+                <a href="{% url 'logout' %}" type="button" class="btn btn-dark btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 p-2 bg-light rounded border shadow-sm">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" data-id="available-cars">
+                    <i class="fa-solid fa-car"></i>
+                    Available Cars
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-id="rental-details">
+                    <i class="fa-solid fa-calendar-week"></i>
+                    Rental Details
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-id="rental-request">
+                    <i class="fa-solid fa-envelope"></i>
+                    Rental Request
+                </a>
+            </li>
+        </ul>
+        <div class="nav-tab-container active" data-id="available-cars">
+            <div class="row justify-content-center">
+                <div class="col-10">
+                    {% if carList.count > 0 %}
+                        <table class="table table-hover" id="availableCarsTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Car Name</th>
+                                    <th scope="col">Model</th>
+                                    <th scope="col">Year</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col" style="width: 10%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for car in carList %}
+                                    <tr>
+                                        <td>{{car.name}}</td>
+                                        <td>{{car.model}}</td>
+                                        <td>{{car.year}}</td>
+                                        <td>{{car.type}}</td>
+                                        <td>
+                                            <button data-id="{{car.id}}" type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#carRentalRequestModal" onclick="handleRentalRequest(this)">Request</button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="d-flex align-items-center flex-column">
+                            <img src="{% static '/images/illustration.png' %}" alt="" srcset="" width="200">
+                            <span style="color: gray;font-size: 14px;">Oops! There is no car available.</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="nav-tab-container" data-id="rental-details">
+            <div class="row justify-content-center">
+                <div class="col-10">
+                    {% if rentalList.count > 0 %}
+                        <table class="table table-hover" id="rentalDetailsTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Car Name</th>
+                                    <th scope="col">Start Date</th>
+                                    <th scope="col">End Date</th>
+                                    <th scope="col">Employee Name</th>
+                                    <th scope="col">Employee Email</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in rentalList %}
+                                    <tr>
+                                        <td>{{req.car.name}}</td>
+                                        <td>{{req.start_date}}</td>
+                                        <td>{{req.end_date}}</td>
+                                        <td>{{req.employee.name}}</td>
+                                        <td>{{req.employee.email}}</td>
+                                        <td>
+                                            <i class="fa-solid fa-check text-success"></i>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="d-flex align-items-center flex-column">
+                            <img src="{% static '/images/illustration.png' %}" alt="" srcset="" width="200">
+                            <span style="color: gray;font-size: 14px;">Oops! There is no rental details.</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="nav-tab-container" data-id="rental-request">
+            <div class="row justify-content-center">
+                <div class="col-10">
+                    {% if requestList.count > 0 %}
+                        <table class="table table-hover" id="rentalRequestTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Car Name</th>
+                                    <th scope="col">Start Date</th>
+                                    <th scope="col">End Date</th>
+                                    <th scope="col" style="width: 15%;">Status</th>
+                                    <th scope="col" style="width: 5%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in requestList %}
+                                    <tr>
+                                        <td>{{req.car.name}}</td>
+                                        <td>{{req.start_date}}</td>
+                                        <td>{{req.end_date}}</td>
+                                        <td>{{req.status}}</td>
+                                        <td>
+                                            {% if req.status == 'Pending' %}
+                                                <i class="fa-regular fa-clock text-primary"></i>
+                                            {% else %}
+                                                <i class="fa-solid fa-ban text-danger"></i>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="d-flex align-items-center flex-column">
+                            <img src="{% static '/images/illustration.png' %}" alt="" srcset="" width="200">
+                            <span style="color: gray;font-size: 14px;">Oops! There is no rental request.</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Car Rental Request Modal -->
+    <div class="modal fade" id="carRentalRequestModal" tabindex="-1" aria-labelledby="carRentalRequestModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content" method="POST" action="{% url 'rental_request_car' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5 " id="carRentalRequestModalLabel" style="flex: 1;text-align: center;">
+                        <i class="fa-solid fa-car-side"></i>
+                        Rental Request
+                    </h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <input type="hidden" id="carIdInput" name="id">
+
+                        <div class="mb-3">
+                            <label for="rentalStartDateInput" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="rentalStartDateInput" name="startdate" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="rentalEndDateInput" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="rentalEndDateInput" name="enddate" required>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Send Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+
+        function handleRentalRequest(target){
+            var id = target.dataset.id;
+            document.querySelector('#carIdInput').value = id;
+        }
+
+        const today = new Date();
+        todayString = today.getFullYear()+'-'+(today.getMonth()+1).toString().padStart(2, '0')+'-'+today.getDate().toString().padStart(2, '0');
+
+        let sdate = document.querySelector('#rentalStartDateInput');
+        let edate = document.querySelector('#rentalEndDateInput');
+
+        sdate.setAttribute('min', todayString);
+        edate.setAttribute('min', todayString);
+
+        sdate.value = todayString;
+        edate.value = todayString;
+
+        document.querySelectorAll('.nav-link').forEach(ele => {
+            ele.addEventListener('click', function (event) {
+                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                document.querySelectorAll('.nav-tab-container').forEach(link => link.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+                document.querySelector(`.nav-tab-container[data-id="${event.currentTarget.dataset.id}"]`).classList.add('active');
+            })
+        })
+
+    </script>
+
+{% endblock content %}

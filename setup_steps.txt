@@ -1,0 +1,27 @@
+pip install -r requirements.txt
+python manage.py makemigrations app
+python manage.py migrate
+python manage.py runserver
+
+--------------------------------
+1. Admin Routes
+	http://127.0.0.1:8000/admin
+
+2. User Routes
+	http://127.0.0.1:8000/
+
+---------------------------------
+3. To Create superuser (Admin)
+	python manage.py createsuperuser
+
+---------------------------------
+4. To create Employee record go to admin page
+	http://127.0.0.1:8000/admin
+
+---------------------------------
+5. For Customer & Employee Login
+	http://127.0.0.1:8000/accounts/login/
+
+---------------------------------
+6. For Customer Sign Up
+	http://127.0.0.1:8000/accounts/register
